@@ -1,0 +1,55 @@
+# Custom career pages (no public ATS API) scraped with Firecrawl (1 credit per page).
+# `link` is a regex matching job-detail URLs on the page. Pages rarely show post dates, so a job
+# counts as "posted today" the first day its URL appears (the first run for a site only seeds).
+# `location` is used when the listing doesn't show one; a named group (?P<loc>...) in `link` takes it from the URL.
+sites:
+  - name: Google
+    tag: general
+    url: https://www.google.com/about/careers/applications/jobs/results?q=software%20engineer&location=United%20States&sort_by=date
+    link: google\.com/about/careers/applications/jobs/results/\d+
+    location: United States
+  - name: Microsoft
+    tag: general
+    url: https://jobs.careers.microsoft.com/global/en/search?q=software%20engineer&lc=United%20States&o=Recent
+    link: apply\.careers\.microsoft\.com/careers/job/\d+
+    location: United States
+  - name: Apple
+    tag: general
+    url: https://jobs.apple.com/en-us/search?search=software%20engineer&sort=newest&location=united-states-USA
+    link: jobs\.apple\.com/en-us/details/\d+
+    location: United States
+  - name: Goldman Sachs
+    tag: fintech
+    url: https://higher.gs.com/results?search=software%20engineer&sort=POSTED_DATE
+    link: higher\.gs\.com/roles/\d+
+  - name: JPMorgan Chase
+    tag: fintech
+    url: https://jpmc.fa.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1001/requisitions?keyword=software%20engineer&location=United%20States&sortBy=POSTING_DATES_DESC
+    link: jpmc\.fa\.oraclecloud\.com/hcmUI/CandidateExperience/en/sites/CX_1001/job/\d+
+    location: United States
+  - name: Jane Street
+    tag: fintech
+    url: https://www.janestreet.com/join-jane-street/open-roles/?type=experienced-candidates&location=new-york
+    link: janestreet\.com/join-jane-street/position/\d+
+    location: New York, NY
+  - name: Citadel
+    tag: fintech
+    url: https://www.citadel.com/careers/open-opportunities/?experience-filter=experienced-professionals
+    link: citadel\.com/careers/details/[\w-]+
+  - name: D. E. Shaw
+    tag: fintech
+    url: https://www.deshaw.com/careers/choose-your-path
+    link: deshaw\.com/careers/[\w-]+-\d+
+  - name: Bloomberg
+    tag: fintech
+    url: https://bloomberg.avature.net/careers/SearchJobs/?keyword=software%20engineer
+    link: bloomberg\.avature\.net/careers/JobDetail/[\w-]+/\d+
+  - name: Optiver
+    tag: fintech
+    url: https://optiver.com/working-at-optiver/career-opportunities/?search=software
+    # only US technology roles; the city comes from the URL via the named group `loc`
+    link: optiver\.com/join-us/jobs/technology/(?P<loc>chicago|austin|new-york)/[\w-]+
+# Tried and dropped: DRW (jobs rendered client-side, no links captured), SIG (page times out).
+
+max_detail_scrapes: 15   # per run: full descriptions for new, title-matching jobs
+credit_reserve: 50       # skip Firecrawl when remaining credits would drop below this

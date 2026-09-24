@@ -1,0 +1,43 @@
+# Candidate profile used for filtering and match scoring.
+# Personal website: set PROFILE_WEBSITE in .env (kept out of git). Its home page and linked pages
+# are added to each resume's text for matching.
+
+resumes:
+  fintech:
+    label: Fintech
+    domain: fintech   # scores a job's finance-ness; the general resume scores the complement
+    path: resumes/fin      # a PDF, or a folder (newest PDF inside is used)
+    # finance signals in a job posting (whole-word, case-insensitive)
+    boost_keywords: [trading, fintech, payments, fx, foreign exchange, post-trade, settlement, clearing,
+                     order management, execution, market data, low latency, risk, ledger, banking,
+                     capital markets, brokerage, quant, hedge fund, securities, fix protocol, crypto]
+  swe:
+    label: General SWE
+    domain: general
+    path: resumes/gen
+
+# Title must contain one of these (whole words, case-insensitive)...
+title_include: [software engineer, software developer, backend, back-end, full stack, fullstack,
+                full-stack, platform engineer, infrastructure engineer, swe, sde, developer,
+                distributed systems, cloud engineer, forward deployed, ai engineer, ml engineer,
+                machine learning engineer, application engineer, member of technical staff]
+# ...and none of these whole words.
+title_exclude: [staff, principal, distinguished, director, manager, vp, head, intern, internship,
+                co-op, architect, sales, recruiter, support, qa, test, frontend, front-end, ios,
+                android, mobile, embedded, firmware, hardware, clearance, ts/sci, secret]
+
+# Queries for the web-search source (Tavily / Firecrawl), each restricted to the past day.
+search_queries:
+  - software engineer
+  - backend software engineer
+  - software engineer fintech
+  - software engineer trading systems
+  - distributed systems engineer
+  - software engineer new grad 2027
+
+# Also run web search through Firecrawl (Tavily is always used when its key is set).
+# Off by default: ~24 credits/run would use up the 1000/month free plan needed for careers scraping.
+firecrawl_search: false
+
+min_score: 55        # hide jobs below this on the dashboard by default
+strong_score: 80     # "strong match" threshold shown on the dashboard

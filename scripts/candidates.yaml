@@ -1,0 +1,190 @@
+# Candidate company → ATS tokens. scripts/verify_companies.py probes each and writes
+# config/companies.yaml with only the ones that respond. Add new ones here (or from
+# data/discovered_companies.txt) and rerun the verifier.
+fintech:
+  greenhouse: [stripe, robinhood, coinbase, brex, affirm, chime, sofi, marqeta, toast, carta, gusto,
+    twosigma, wehrtyou, drweng, imc, jumptrading, optiverus, towerresearchcapital, akunacapital,
+    clearstreet, flowtraders, point72, virtu, oldmissioncapital, citadelsecurities, janestreet, sig,
+    nubank, betterment, wealthfront, addepar, blend, flywire, checkoutcom, adyen, payoneer, remitly,
+    monzo, bitgo, anchorage, gemini, kraken, circle, ripple, chainalysis, fireblocks, paxos, dydx,
+    blockchain, figure, upstart, lendingclub, oportun, dave, current, varo, stash, acorns, public,
+    webull, tastytrade, apexfintechsolutions, riskified, forter, sardine, alloy, socure, bolt, klarna,
+    moderntreasury, pipe, capchase, navan, airwallex, rippling, bill, melio, tipalti, justworks,
+    brexhq, ramp, mercury, plaid, galileo, synctera, treasuryprime, unit, column, lithic, highnote,
+    trueaccord, tala, esusu, petal, mission lane, missionlane, aspiration, earnin, brigit, albert,
+    ethos, lemonade, root, hippo, policygenius, oscar, vouch, newfront, pagaya, bloomberg, hrt,
+    susquehanna, fiverings, xtxmarkets, gsa, squarepoint, schonfeld, balyasny, millennium, cubist,
+    graviton, radix, belvedere, peak6, cboe, iex, tradeweb, marketaxess, moneylion, cross river,
+    crossriver, trumid, clearco, arcadia, tassat, taxbit, zerohash, moonpay, consensys, alchemy]
+  lever: [plaid, ramp, kraken, wealthsimple, jumptrading, belvedere, radixtrading, peak6, ripple,
+    brex, mercury, crypto, gemini, figure, drw, imc, voleon, tower, citadel, qube, hudsonrivertrading,
+    aquatic, aquaticcapital, arrowstreet, pdtpartners, headlands, headlandstech, 5rings, jane-street,
+    teza, xr, txn, galaxy, anchorage, bitgo, blockfi, ftx, okx, binance, bullish, ledger, coinbasenew,
+    sezzle, zip, klarna, affirm, upgrade, avant, prosper, marqeta, zilch, fundbox, bluevine, kabbage,
+    tally, truebill, stash, tipalti, paystand, spreedly, finix, rainforest, stax, payjunction]
+  ashby: [ramp, plaid, mercury, moderntreasury, increase, column, unit, lithic, alloy, brex, deel,
+    rippling, puzzle, pilot, digits, mesh, mercoa, method, orum, astra, atomic, pinwheel, argyle,
+    truelayer, yodlee, finch, check, gusto, wealthfront, public, titan, composer, alpaca, drivewealth,
+    tastyworks, tradier, polymarket, kalshi, robinhood, crypto, phantom, uniswap, paradigm, eigenlayer,
+    ondo, securitize, fnality, hadrius, taktile, sardine, persona, footprint, parafin, arc, slope,
+    hightouch, rho, jiko, bilt, imprint, kikoff, grow, moov, stytch, warp, found, novo, relay, meow]
+  workday:
+    - capitalone|wd12|Capital_One
+    - mastercard|wd1|CorporateCareers
+    - paypal|wd1|jobs
+    - statestreet|wd1|Global
+    - blackrock|wd1|BlackRock_Professional
+    - northerntrust|wd1|northerntrust
+    - bnymellon|wd5|BNY_Careers
+    - cmegroup|wd1|cme_careers
+    - nasdaq|wd1|Global_External_Site
+    - fis|wd5|SearchJobs
+    - fiserv|wd5|EXT
+    - broadridge|wd5|Careers
+    - citi|wd5|2
+    - wellsfargo|wd1|WellsFargoJobs
+    - ghr|wd1|Lateral-US
+    - ms|wd5|External
+    - fmr|wd1|FidelityCareers
+    - schwab|wd5|Careers
+    - vanguard|wd5|vanguard_external
+    - usbank|wd1|US_Bank_Careers
+    - pnc|wd5|External
+    - discover|wd5|Discover
+    - ally|wd1|Ally_Careers
+    - synchrony|wd5|Careers
+    - americanexpress|wd5|AmericanExpress
+    - intuit|wd1|Intuit
+    - block|wd1|Block
+    - ice|wd1|ICE_Careers
+    - spglobal|wd5|SPGI_Careers
+    - moodys|wd5|moodys
+    - msci|wd1|MSCI
+    - dtcc|wd1|dtcc
+    - twosigma|wd1|Two_Sigma
+    - citadel|wd1|Citadel
+  smartrecruiters: [Visa, Square, Wise, Experian, Equifax, Nuvei, WesternUnion, Worldline, Revolut]
+general:
+  greenhouse: [databricks, datadog, cloudflare, mongodb, figma, airbnb, lyft, pinterest, dropbox,
+    reddit, discord, twilio, okta, elastic, instacart, doordashusa, gitlab, samsara, asana, airtable,
+    anthropic, scaleai, nuro, waymo, roblox, duolingo, grammarly, squarespace, etsy, peloton, spotify,
+    twitch, unity, epicgames, riotgames, snapchat, snap, lucidmotors, rivian, verkada, anduril,
+    flexport, faire, chime, benchling, flatironhealth, tempus, color, 23andme, zocdoc, oura, hinge,
+    tinder, bumble, vimeo, yext, mixpanel, amplitude, braze, contentful, fivetran, dbtlabs, starburst,
+    cockroachlabs, planetscale, neon, temporal, grafanalabs, pagerduty, launchdarkly, circleci,
+    sourcegraph, postman, kong, hashicorp, pulumi, sentry, honeycomb, newrelic, sumologic, cribl,
+    chainguard, snyk, wiz, lacework, abnormalsecurity, crowdstrike, sentinelone, tanium, 1password,
+    lattice, gong, outreach, clari, apollo, zoominfo, hubspot, intercom, zendesk, freshworks,
+    toasttab, doordash, gopuff, thumbtack, nextdoor, yelp, quora, medium, substack, patreon,
+    coursera, udemy, chegg, masterclass, calm, headspace, noom, ro, hims, cerebral, spring health,
+    springhealth, lyra, headway, alma, sword, hingehealth, omada, cityblock, devoted, oscarhealth,
+    cohere, huggingface, runwayml, stabilityai, characterai, inflection, adept, mistral, together,
+    anyscale, weightsandbiases, pinecone, weaviate, labelbox, snorkelai, dataiku, alteryx, sisense,
+    thoughtspot, hex, observable, retool, airbyte, census, segment, rudderstack, mparticle, heap,
+    fullstory, logrocket, glean, notion, coda, clickup, monday, smartsheet, miro, loom, calendly,
+    docusign, box, zoom, slack, atlassian, canva, webflow, wix, shopify, bigcommerce, klaviyo,
+    attentive, iterable, sprinklr, qualtrics, momentive, medallia, servicetitan, procore, samsara,
+    motive, keeptruckin, convoy, project44, fourkites, shipbob, flock, flocksafety, axon, palantir,
+    applovin, ironsource, liftoff, moloco, tradedesk, thetradedesk, criteo, taboola, outbrain,
+    magnite, pubmatic, integral, doubleverify, zeta, cision, meltwater, sprout, hootsuite,
+    affirm, oportun, wayfair, chewy, stitchfix, poshmark, thredup, rent, opendoor, redfin,
+    compass, zillow, offerpad, divvy, pacaso, roofstock, arrived, fundrise, ribbon, orchard]
+  lever: [palantir, spotify, zoox, attentive, netflix, lucid, aurora, cruise, nianticlabs, niantic,
+    kong, matterport, shieldai, saronic, skydio, joby, relativity, astranis, varda, hadrian,
+    mistral, perplexity, elevenlabs, pika, ideogram, suno, cartesia, luma, typeface, jasper,
+    writer, tome, gamma, beautiful, descript, captions, synthesia, heygen, veed, clipchamp,
+    wealthfront, betterup, whoop, eightsleep, tonal, mirror, zwift, strava, alltrails, komoot]
+  ashby: [openai, notion, linear, vercel, replit, anysphere, perplexity, modal, retool, supabase,
+    posthog, sierra, harvey, hebbia, cohere, confluent, snowflake, airtable, ramp, deel, cursor,
+    glean, writer, runway, pika, elevenlabs, decagon, cognition, magic, poolside, imbue, reka,
+    baseten, fireworks, fal, replicate, lambda, coreweave, crusoe, together, groq, cerebras, etched,
+    sambanova, tenstorrent, lightmatter, ayar, figure, physicalintelligence, skild, 1x, apptronik,
+    agility, dust, lindy, clay, attio, twenty, cal, dub, resend, clerk, workos, convex, inngest,
+    trigger, neon, tinybird, motherduck, clickhouse, materialize, redpanda, warpstream, turso,
+    fly, render, railway, zed, warp, raycast, arc, browserbase, e2b, daytona, mintlify, stainless,
+    speakeasy, openrouter, langchain, llamaindex, pinecone, chroma, qdrant, zilliz, vespa, exa,
+    tavily, firecrawl, browserless, scale, mercor, micro1, turing, labelbox, snorkel, cleanlab]
+  workday:
+    - nvidia|wd5|NVIDIAExternalCareerSite
+    - salesforce|wd12|External_Career_Site
+    - adobe|wd5|external_experienced
+    - intel|wd1|External
+    - walmart|wd5|WalmartExternal
+    - workday|wd5|Workday
+    - dell|wd1|External
+    - hp|wd5|ExternalCareerSite
+    - cisco|wd5|Cisco_Careers
+    - vmware|wd1|VMware
+    - autodesk|wd1|Ext
+    - servicenow|wd1|External
+    - target|wd5|targetcareers
+    - disney|wd5|disneycareer
+    - comcast|wd5|Comcast_Careers
+    - verizon|wd12|verizon-careers
+    - tmobile|wd1|External
+    - att|wd1|ATTGeneral
+    - boeing|wd1|EXTERNAL_CAREERS
+    - lockheedmartin|wd1|LMCareers
+    - motorolasolutions|wd5|Careers
+    - zillow|wd5|Zillow_Group_External
+    - expedia|wd5|search
+    - twilio|wd5|Twilio
+    - crowdstrike|wd5|crowdstrikecareers
+    - paloaltonetworks|wd5|External
+    - snowflake|wd5|Snowflake
+    - redhat|wd5|jobs
+    - netapp|wd1|NetApp
+    - micron|wd1|External
+    - amd|wd1|External
+    - qualcomm|wd5|External
+    - broadcom|wd1|External_Career
+    - pfizer|wd1|PfizerCareers
+    - humana|wd5|Humana_External_Career_Site
+    - unitedhealthgroup|wd5|External
+    - cvshealth|wd1|CVS_Health_Careers
+    - uber|wd5|Uber
+    - roku|wd5|Roku
+    - sonos|wd1|Sonos_Careers
+  smartrecruiters: [ServiceNow, LinkedIn, Bosch, Ubisoft, Atlassian, Spotify, SquareInc, NBCUniversal3,
+    Canva, Zalando, DeliveryHero, Grab, TikTok, ByteDance, Sephora, Ikea, Nestle]
+# Display names where the token isn't a readable name (lowercased token or workday tenant → name).
+names:
+  moderntreasury: Modern Treasury
+  physicalintelligence: Physical Intelligence
+  openai: OpenAI
+  elevenlabs: ElevenLabs
+  langchain: LangChain
+  llamaindex: LlamaIndex
+  posthog: PostHog
+  workos: WorkOS
+  clickhouse: ClickHouse
+  motherduck: MotherDuck
+  openrouter: OpenRouter
+  shieldai: Shield AI
+  alltrails: AllTrails
+  crypto: Crypto.com
+  deliveryhero: Delivery Hero
+  nbcuniversal3: NBCUniversal
+  blackrock: BlackRock
+  capitalone: Capital One
+  citi: Citi
+  cmegroup: CME Group
+  fis: FIS
+  fmr: Fidelity Investments
+  ghr: Bank of America
+  ms: Morgan Stanley
+  paypal: PayPal
+  pnc: PNC
+  statestreet: State Street
+  usbank: U.S. Bank
+  att: AT&T
+  crowdstrike: CrowdStrike
+  cvshealth: CVS Health
+  hp: HP
+  motorolasolutions: Motorola Solutions
+  nvidia: NVIDIA
+  redhat: Red Hat
+  tmobile: T-Mobile
+  wellsfargo: Wells Fargo
+  americanexpress: American Express
+  spglobal: S&P Global

@@ -1,0 +1,11 @@
+.env
+.venv/
+__pycache__/
+*.pyc
+data/
+resumes/*
+!resumes/.gitkeep
+site/index.html
+site/jobs.json
+.pytest_cache/
+.firecrawl/

@@ -1,6 +1,7 @@
 """Filtering: posted today, US location, relevant title, seniority, dedupe."""
 from __future__ import annotations
 
+import os
 import re
 from collections import Counter
 from datetime import datetime, timedelta, timezone
@@ -63,9 +64,16 @@ def is_remote(job: Job) -> bool:
     return bool(re.search(r"\bremote\b", f"{job.location} {job.title}", re.I))
 
 
+def window_hours() -> int | None:
+    """Rolling window set via `--hours` (exported as JOBSCRAPER_HOURS so tmux panes inherit it)."""
+    v = os.environ.get("JOBSCRAPER_HOURS", "").strip()
+    return int(v) if v.isdigit() and int(v) > 0 else None
+
+
 def window_start(now: datetime | None = None, hours: int | None = None) -> datetime:
-    """Start of 'today' in US Eastern; if hours given, a rolling window instead."""
+    """Start of the search window: a rolling `hours` window if set, else midnight US Eastern today."""
     now = now or datetime.now(timezone.utc)
+    hours = hours or window_hours()
     if hours:
         return now - timedelta(hours=hours)
     et = now.astimezone(ET)
@@ -73,9 +81,12 @@ def window_start(now: datetime | None = None, hours: int | None = None) -> datet
 
 
 def posted_today(job: Job, start: datetime) -> bool:
+    """In the window. Date-only postings count if their ET date is on or after the window's start date."""
     if job.posted_at is None:
         return False
     p = job.posted_at if job.posted_at.tzinfo else job.posted_at.replace(tzinfo=timezone.utc)
+    if job.date_only:
+        return p.astimezone(ET).date() >= start.astimezone(ET).date()
     return p >= start
 
 
@@ -139,6 +150,67 @@ def work_auth(text: str) -> tuple[str, str]:
     return ("sponsors", "") if SPONSORS.search(text or "") else ("unknown", "")
 
 
+# Experience requirement: minimum years stated in the *required* part of the posting.
+_WORDS = {w: i for i, w in enumerate(
+    "zero one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen".split())}
+_NUM = r"(?:\d{1,2}|" + "|".join(_WORDS) + r")"
+YEARS = re.compile(
+    rf"(?:(?:at least|minimum(?: of)?|min\.?|over|more than)\s+)?(?P<a>{_NUM})\s*(?:\+|plus)?\s*"
+    rf"(?:(?:-|–|to)\s*(?P<b>{_NUM})\s*\+?\s*)?(?:years?|yrs?)\b",
+    re.I,
+)
+PREFERRED_SECTION = re.compile(
+    r"\b(?:preferred|desired|bonus|additional|nice[- ]to[- ]have)\s+(?:qualifications|skills|requirements|experience)"
+    r"|\bnice[- ]to[- ]haves?\b|\bbonus points\b|\bpluses\b|\bwhat would be nice\b",
+    re.I,
+)
+EXPERIENCE_CTX = re.compile(r"experience|exp\b|professional|industry|developing|engineering|programming|building", re.I)
+NOT_EXPERIENCE = re.compile(r"\bold\b|history|in business|of age|anniversary|founded|track record of|warranty", re.I)
+SOFT = re.compile(r"preferred|ideally|nice to have|a plus|bonus|desired", re.I)
+
+
+def _num(s: str) -> int:
+    return int(s) if s.isdigit() else _WORDS[s.lower()]
+
+
+def required_years(text: str) -> int | None:
+    """Minimum years of experience a posting requires, or None if it doesn't say.
+
+    Only the part before a "Preferred qualifications"/"Nice to have" section counts. Requirements joined
+    by "or" (e.g. "BS + 8 years, or MS + 6 years") are alternatives, so the smallest wins; independent
+    requirements elsewhere take the max.
+    """
+    text = text or ""
+    # section headers only: "...do not meet all of the preferred qualifications" (Amazon) is prose
+    cut = next((m for m in PREFERRED_SECTION.finditer(text)
+                if not re.search(r"\b(?:the|all|any|our|these)\s+$", text[max(0, m.start() - 12):m.start()], re.I)),
+               None)
+    if cut:
+        text = text[:cut.start()]
+    hits: list[tuple[int, int, int]] = []  # (start, end, years)
+    for m in YEARS.finditer(text):
+        after, before = text[m.end():m.end() + 60], text[max(0, m.start() - 40):m.start()]
+        if not (EXPERIENCE_CTX.search(after) or re.search(r"experience\W*$", before, re.I)):
+            continue
+        if NOT_EXPERIENCE.search(after[:30]) or SOFT.search(text[m.end():m.end() + 80].split(".")[0]):
+            continue
+        a = _num(m["a"])
+        if 0 < a <= 25:
+            hits.append((m.start(), m.end(), a))
+    if not hits:
+        return None
+    groups, cur = [], [hits[0]]
+    for h in hits[1:]:
+        gap = text[cur[-1][1]:h[0]]
+        if len(gap) < 150 and re.search(r"\bor\b", gap, re.I):
+            cur.append(h)
+        else:
+            groups.append(cur)
+            cur = [h]
+    groups.append(cur)
+    return max(min(y for _, _, y in g) for g in groups)
+
+
 def dedupe(jobs: list[Job]) -> list[Job]:
     seen: dict[str, Job] = {}
     for j in jobs:
@@ -163,6 +235,12 @@ def apply_filters(jobs: list[Job], prof: dict, start: datetime, blocked: Counter
         if status == "blocked":
             if blocked is not None:
                 blocked[reason] += 1
+            continue
+        j.years_required = required_years(j.description)
+        max_years = prof.get("max_years_required")
+        if max_years is not None and j.years_required is not None and j.years_required > max_years:
+            if blocked is not None:
+                blocked[f"over {max_years} yrs experience"] += 1
             continue
         if status == "sponsors" and "sponsors" not in j.tags:
             j.tags.append("sponsors")

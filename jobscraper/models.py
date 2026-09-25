@@ -18,6 +18,10 @@ class Job:
     description: str = ""
     remote: bool = False
     tags: list[str] = field(default_factory=list)
+    # True when the source only gives a calendar date (Workday, Amazon): compared by ET date, not time
+    date_only: bool = False
+    # filled by filters: minimum years of experience the posting requires (None = not stated)
+    years_required: int | None = None
     # filled by scoring
     scores: dict[str, float] = field(default_factory=dict)
     best_resume: str = ""

@@ -19,6 +19,7 @@ def build(jobs: list[Job], stats: dict) -> None:
         "generated_at": datetime.now(ET).strftime("%b %d, %Y %I:%M %p ET"),
         "min_score": profile().get("min_score", 0),
         "strong_score": profile().get("strong_score", 80),
+        "max_years": profile().get("max_years_required"),
         "resumes": [r["label"] for r in profile()["resumes"].values()],
         "stats": stats,
         "jobs": rows,

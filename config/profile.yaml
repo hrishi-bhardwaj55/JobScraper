@@ -16,24 +16,40 @@ resumes:
     domain: general
     path: resumes/gen
 
-# Title must contain one of these (whole words, case-insensitive)...
-title_include: [software engineer, software developer, backend, back-end, full stack, fullstack,
-                full-stack, platform engineer, infrastructure engineer, swe, sde, developer,
-                distributed systems, cloud engineer, forward deployed, ai engineer, ml engineer,
-                machine learning engineer, application engineer, member of technical staff]
+# Title must contain one of these (whole words, case-insensitive). Bare "developer" is left out on
+# purpose: it mostly matched WordPress/Salesforce/ETL roles.
+title_include: [software engineer, software developer, software development engineer, backend, back-end,
+                full stack, fullstack, full-stack, platform engineer, infrastructure engineer,
+                swe, sde, java developer, java engineer, distributed systems, cloud engineer,
+                forward deployed, ai engineer, ml engineer, machine learning engineer,
+                application engineer, member of technical staff, systems software]
 # ...and none of these whole words.
 title_exclude: [staff, principal, distinguished, director, manager, vp, head, intern, internship,
                 co-op, architect, sales, recruiter, support, qa, test, frontend, front-end, ios,
-                android, mobile, embedded, firmware, hardware, clearance, ts/sci, secret]
+                android, mobile, embedded, firmware, hardware, clearance, ts/sci, secret,
+                wordpress, salesforce, servicenow, sap, informatica, etl, mainframe, cobol, sharepoint,
+                dynamics, power bi, tableau, unity, game, graphics, ui, ux, designer, data analyst,
+                devops, sre, site reliability, network, security engineer, help desk, technician]
+
+# Hide jobs whose required qualifications ask for more than this many years of experience.
+# Postings that don't state a number are kept.
+max_years_required: 7
+
+# Ranking preference on top of resume match: backend roles, Java stack.
+preferences:
+  weight: 0.15                 # share of the 0–100 score
+  backend_title: [backend, back-end, back end, server, distributed, platform, infrastructure, api,
+                  systems, core, services, java, payments, trading, data platform]
+  stack: [java, spring, spring boot, jvm, kotlin, scala, microservices, kafka]
 
 # Queries for the web-search source (Tavily / Firecrawl), each restricted to the past day.
 search_queries:
-  - software engineer
-  - backend software engineer
-  - software engineer fintech
-  - software engineer trading systems
-  - distributed systems engineer
-  - software engineer new grad 2027
+  - backend software engineer java
+  - java software engineer
+  - senior backend engineer distributed systems
+  - software engineer ii backend
+  - backend engineer fintech payments
+  - software engineer trading systems java
 
 # Also run web search through Firecrawl (Tavily is always used when its key is set).
 # Off by default: ~24 credits/run would use up the 1000/month free plan needed for careers scraping.

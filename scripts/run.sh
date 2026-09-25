@@ -3,6 +3,7 @@
 #
 #   scripts/run.sh            full start: fetch (parallel panes) -> pipeline -> serve -> tunnel
 #   scripts/run.sh --refresh  re-run fetch + pipeline only (server/tunnel keep running)
+#   add --hours N to either   jobs posted in the last N hours instead of "today (ET)"
 #   tmux attach -t jobs       watch it
 set -euo pipefail
 cd "$(dirname "$0")/.."
@@ -11,6 +12,20 @@ SESSION=jobs
 PORT=${PORT:-8080}
 SOURCES=(greenhouse lever ashby smartrecruiters workday boards websearch careers)
 PY="$ROOT/.venv/bin/python"
+
+REFRESH=0
+HOURS=""
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --refresh) REFRESH=1 ;;
+    --hours) HOURS="$2"; shift ;;
+    *) echo "unknown option: $1"; exit 2 ;;
+  esac
+  shift
+done
+# tmux panes inherit nothing from this shell, so pass the window on each command line
+ENVP=""
+[[ -n "$HOURS" ]] && ENVP="JOBSCRAPER_HOURS=$HOURS "
 
 if [[ ! -x "$PY" ]]; then
   python3 -m venv .venv
@@ -26,7 +41,7 @@ launch_fetch() {
     s=${SOURCES[$i]}
     [[ $i -gt 0 ]] && tmux split-window -d -t "$SESSION:fetch" -c "$ROOT" && tmux select-layout -t "$SESSION:fetch" tiled >/dev/null
     tmux send-keys -t "$SESSION:fetch.$i" \
-      "$PY -m jobscraper.cli fetch --source $s 2>&1 | tee data/logs/$s.log; tmux wait-for -S done-$s" Enter
+      "$ENVP$PY -m jobscraper.cli fetch --source $s 2>&1 | tee data/logs/$s.log; tmux wait-for -S done-$s" Enter
   done
 
   local waits=""
@@ -34,10 +49,10 @@ launch_fetch() {
   tmux kill-window -t "$SESSION:pipeline" 2>/dev/null || true
   tmux new-window -d -t "$SESSION" -n pipeline -c "$ROOT"
   tmux send-keys -t "$SESSION:pipeline" \
-    "echo 'waiting for ${#SOURCES[@]} fetchers…'; $waits $PY -m jobscraper.cli pipeline 2>&1 | tee data/logs/pipeline.log; tmux wait-for -S pipeline-done" Enter
+    "echo 'waiting for ${#SOURCES[@]} fetchers…'; $waits $ENVP$PY -m jobscraper.cli pipeline 2>&1 | tee data/logs/pipeline.log; tmux wait-for -S pipeline-done" Enter
 }
 
-if [[ "${1:-}" == "--refresh" ]]; then
+if [[ $REFRESH == 1 ]]; then
   tmux has-session -t "$SESSION" 2>/dev/null || { echo "session not running; run without --refresh"; exit 1; }
   launch_fetch
   tmux wait-for pipeline-done

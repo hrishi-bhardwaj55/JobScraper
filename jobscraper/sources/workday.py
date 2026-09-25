@@ -7,7 +7,7 @@ from __future__ import annotations
 from datetime import datetime, timedelta, timezone
 
 from ..config import companies_for, profile
-from ..filters import ET, title_ok
+from ..filters import ET, title_ok, window_start
 from ..models import Job
 from . import gather_limited, html_to_text
 
@@ -31,6 +31,8 @@ async def _one(client, c) -> list[Job]:
     base = f"https://{tenant}.{wd}.myworkdayjobs.com"
     api = f"{base}/wday/cxs/{tenant}/{site}"
     prof = profile()
+    # a rolling window that reaches back past midnight ET also needs "Posted Yesterday"
+    fresh = ("today", "yesterday") if window_start().astimezone(ET).date() < datetime.now(ET).date() else ("today",)
     paths: dict[str, dict] = {}
     for q in QUERIES:
         for page in range(MAX_PAGES):
@@ -40,7 +42,8 @@ async def _one(client, c) -> list[Job]:
             )
             posts = (data or {}).get("jobPostings") or []
             for p in posts:
-                if "today" in (p.get("postedOn") or "").lower() and title_ok(p.get("title", ""), prof):
+                posted_on = (p.get("postedOn") or "").lower()
+                if any(f in posted_on for f in fresh) and title_ok(p.get("title", ""), prof):
                     paths[p["externalPath"]] = p
             if len(posts) < PAGE:
                 break
@@ -63,6 +66,7 @@ async def _one(client, c) -> list[Job]:
             posted_at=posted.astimezone(timezone.utc) if posted else None,
             description=html_to_text(d.get("jobDescription")),
             source="workday",
+            date_only=True,
         )]
 
     return await gather_limited([detail(k, v) for k, v in paths.items()], limit=6)

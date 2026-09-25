@@ -83,9 +83,10 @@ async def amazon(client) -> list[Job]:
                     posted_at=posted,
                     description=html_to_text(" ".join(filter(None, [
                         p.get("description"), p.get("basic_qualifications"), p.get("preferred_qualifications")]))),
-                    source="boards", tags=["amazon"],
+                    source="boards", tags=["amazon"], date_only=True,
                 ))
-            if len(rows) < 100 or (jobs[-1].posted_at and jobs[-1].posted_at < window_start()):
+            if len(rows) < 100 or (jobs[-1].posted_at and
+                                   jobs[-1].posted_at.date() < window_start().astimezone(ET).date()):
                 break
     return jobs
 

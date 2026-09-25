@@ -38,3 +38,14 @@ def test_fintech_job_prefers_fintech_resume():
     [scored] = score_jobs([job], profiles)
     assert scored.best_resume == "Fintech"
     assert scored.scores["Fintech"] > scored.scores["SWE"]
+
+
+def test_preference_prefers_backend_java():
+    from jobscraper.scoring import preference_score
+
+    prefs = {"backend_title": ["backend", "platform"], "stack": ["java", "spring", "kafka"]}
+    mk = lambda t, d="": Job(title=t, company="c", location="NY", url="u", source="s", description=d)
+    java_backend = preference_score(mk("Backend Engineer (Java)"), prefs)
+    backend_spring = preference_score(mk("Backend Engineer", "Java, Spring Boot and Kafka services"), prefs)
+    ml = preference_score(mk("Machine Learning Engineer", "PyTorch"), prefs)
+    assert java_backend == 1.0 and 0.5 < backend_spring < 1.0 and ml == 0.0

@@ -43,3 +43,9 @@ def test_websearch_linkedin_title():
                "Acme hiring Software Engineer in New York, NY | LinkedIn", "")
     assert (j.company, j.title, j.location) == ("Acme", "Software Engineer", "New York, NY")
     assert to_job("https://www.linkedin.com/jobs/search?keywords=x", "Jobs", "") is None
+
+
+def test_websearch_linkedin_role_at_company():
+    j = to_job("https://www.linkedin.com/jobs/view/it-java-developer-at-apex-systems-4471626315",
+               "IT - Java Developer - Mid-Level at Apex Systems", "")
+    assert (j.company, j.title) == ("Apex Systems", "IT - Java Developer - Mid-Level")

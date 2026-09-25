@@ -11,11 +11,12 @@ import asyncio
 import importlib
 import json
 import logging
+import os
 import time
 from collections import Counter
 
 from .config import RAW, profile
-from .filters import apply_filters, window_start
+from .filters import ET, apply_filters, window_hours, window_start
 from .http import Client
 from .models import Job
 from .sources import SOURCES
@@ -69,9 +70,10 @@ def pipeline(hours: int | None = None) -> None:
     raw = load_raw()
     blocked = Counter()
     jobs = apply_filters(raw, profile(), window_start(hours=hours), blocked)
-    log.info("%d raw postings -> %d relevant US jobs posted today", len(raw), len(jobs))
-    log.info("dropped for work authorization: %s", dict(blocked) or "none")
-    jobs = score_jobs(jobs, load_profiles(), fintech_companies())
+    log.info("%d raw postings -> %d relevant US jobs in window (since %s)", len(raw), len(jobs),
+             window_start(hours=hours).astimezone(ET).strftime("%b %d %I:%M %p ET"))
+    log.info("dropped: %s", dict(blocked) or "none")
+    jobs = score_jobs(jobs, load_profiles(), fintech_companies(), profile().get("preferences"))
     store.upsert(jobs)
     stats = {
         "raw": len(raw),
@@ -80,6 +82,7 @@ def pipeline(hours: int | None = None) -> None:
         "companies": len({j.company for j in jobs}),
         "blocked": dict(blocked),
         "sponsors": sum("sponsors" in j.tags for j in jobs),
+        "window_hours": hours or window_hours(),
     }
     build(jobs, stats)
     log.info("dashboard built: site/index.html (%d jobs)", len(jobs))
@@ -90,11 +93,12 @@ def main() -> None:
     sub = ap.add_subparsers(dest="cmd", required=True)
     f = sub.add_parser("fetch")
     f.add_argument("--source", required=True, choices=SOURCES)
-    for name in ("pipeline", "all"):
-        p = sub.add_parser(name)
-        p.add_argument("--hours", type=int, help="rolling window instead of 'today (ET)'")
+    for p in (f, sub.add_parser("pipeline"), sub.add_parser("all")):
+        p.add_argument("--hours", type=int, help="rolling window of the last N hours instead of 'today (ET)'")
     ap.add_argument("-v", "--verbose", action="store_true")
     args = ap.parse_args()
+    if args.hours:
+        os.environ["JOBSCRAPER_HOURS"] = str(args.hours)  # sources read the window from here
     logging.basicConfig(
         level=logging.DEBUG if args.verbose else logging.INFO,
         format="%(asctime)s %(levelname)s %(message)s", datefmt="%H:%M:%S",

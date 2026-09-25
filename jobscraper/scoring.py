@@ -88,11 +88,35 @@ def fintech_ness(text: str, keywords: list[str], fintech_company: bool) -> float
     return max(domain_score(text, keywords), 0.6 if fintech_company else 0.0)
 
 
-def score_jobs(jobs: list[Job], profiles: dict[str, dict], fintech_companies: set[str] = frozenset()) -> list[Job]:
+def _has(words: list[str], text: str) -> int:
+    return sum(1 for w in words if re.search(rf"(?<![a-z]){re.escape(w)}(?![a-z])", text, re.I))
+
+
+def preference_score(job: Job, prefs: dict) -> float:
+    """0–1: backend-flavored title (half) and Java-family stack (half; strongest when in the title)."""
+    if not prefs:
+        return 0.0
+    title_hit = 1.0 if _has(prefs.get("backend_title", []), job.title) else 0.0
+    stack = prefs.get("stack", [])
+    if _has(stack, job.title):
+        stack_hit = 1.0
+    else:
+        n = _has(stack, job.description[:6000])
+        stack_hit = 0.7 if n >= 2 else 0.4 if n == 1 else 0.0
+    return 0.5 * title_hit + 0.5 * stack_hit
+
+
+def score_jobs(jobs: list[Job], profiles: dict[str, dict], fintech_companies: set[str] = frozenset(),
+               prefs: dict | None = None) -> list[Job]:
     """Domain component is symmetric: the fintech resume earns a job's fintech-ness, the general resume
-    its complement, so generic words ("cloud", "api") can't hand one resume a bonus on every job."""
+    its complement, so generic words ("cloud", "api") can't hand one resume a bonus on every job.
+    `prefs` (profile.yaml `preferences`) takes `weight` of the score; the rest keeps its proportions."""
     if not jobs:
         return jobs
+    prefs = prefs or {}
+    w_pref = float(prefs.get("weight", 0.0))
+    scale = 1.0 - w_pref
+    pref = [preference_score(j, prefs) for j in jobs]
     texts = [job_text(j) for j in jobs]
     jv = embed(texts)
     fin_kw = next((p["boost_keywords"] for p in profiles.values() if p.get("domain") == "fintech"), [])
@@ -105,10 +129,11 @@ def score_jobs(jobs: list[Job], profiles: dict[str, dict], fintech_companies: se
             pv /= np.linalg.norm(pv)
         pskills = skills_in(p["text"])
         cos = jv @ pv
-        for j, t, c, f in zip(jobs, texts, cos, fin):
+        for j, t, c, f, pr in zip(jobs, texts, cos, fin, pref):
             s_sk, matched = skill_score(pskills, skills_in(t))
             dom = f if p.get("domain") == "fintech" else 1 - f
-            s = 100 * (W_EMBED * rescale(c) + W_SKILL * s_sk + W_DOMAIN * dom)
+            base = W_EMBED * rescale(c) + W_SKILL * s_sk + W_DOMAIN * dom
+            s = 100 * (scale * base + w_pref * pr)
             j.scores[p["label"]] = round(s, 1)
             if s > j.score:
                 j.score, j.best_resume, j.matched_skills = round(s, 1), p["label"], matched

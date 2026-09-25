@@ -49,6 +49,8 @@ def to_job(url: str, title: str, content: str) -> Job | None:
         m = LINKEDIN_TITLE.match(title)
         if m:
             company, role, loc = m["company"], m["title"], m["loc"]
+        elif m := re.match(r"^(?P<title>.+?) at (?P<company>[^|]+?)(?: \| LinkedIn)?$", title):
+            company, role = m["company"], m["title"]
     elif "indeed.com" in host:
         if "viewjob" not in url and "jk=" not in url:
             return None

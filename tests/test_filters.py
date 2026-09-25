@@ -2,7 +2,7 @@ from datetime import datetime, timedelta, timezone
 
 import pytest
 
-from jobscraper.filters import apply_filters, is_us, title_ok, window_start, work_auth
+from jobscraper.filters import apply_filters, is_us, required_years, title_ok, window_start, work_auth
 from jobscraper.models import Job
 
 PROF = {
@@ -102,3 +102,37 @@ def test_work_auth_unknown_passes(text):
 ])
 def test_work_auth_sponsors(text):
     assert work_auth(text + " " + EEO)[0] == "sponsors"
+
+
+@pytest.mark.parametrize("text,years", [
+    ("Basic Qualifications: At least 4 years of experience in software engineering.", 4),
+    ("Requirements: 8+ years of professional software development experience.", 8),
+    ("You have 5-8 years of backend engineering experience.", 5),
+    ("Minimum of ten years experience building distributed systems.", 10),
+    ("Experience: 3+ years", 3),
+    ("BS with 8+ years of experience, or MS with 6+ years of experience.", 6),
+    ("3+ years of Java experience. 6+ years of professional software engineering experience.", 6),
+    ("Required: 4+ years of software experience. Preferred Qualifications: 10+ years of experience leading teams.", 4),
+    ("5+ years of experience with Kafka preferred. 2+ years of professional experience.", 2),
+    ("We have been in business for 25 years old company. Build great APIs.", None),
+    ("Join our team and build scalable backend services in Java.", None),
+])
+def test_required_years(text, years):
+    assert required_years(text) == years
+
+
+def test_experience_filter_drops_over_limit():
+    now = datetime.now(timezone.utc)
+    prof = {**PROF, "max_years_required": 7}
+    mk = lambda d: Job(title="Software Engineer", company=d[:5], location="New York, NY", url="u",
+                       source="greenhouse", posted_at=now, description=d)
+    out = apply_filters([mk("8+ years of experience required."), mk("7+ years of experience."), mk("")],
+                        prof, window_start(hours=24))
+    assert sorted(j.years_required or 0 for j in out) == [0, 7]
+
+
+def test_required_years_ignores_preferred_prose():
+    d = ("Even if you do not meet all of the preferred qualifications and skills listed, we encourage you to apply. "
+         "Basic qualifications - 3+ years of non-internship professional software development experience "
+         "- 2+ years of non-internship design or architecture experience")
+    assert required_years(d) == 3

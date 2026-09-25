@@ -89,13 +89,14 @@ const $ = id => document.getElementById(id);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const safeUrl = u => /^https?:\/\//i.test(u || "") ? u : "#";
 
-$("gen").textContent = `Posted today in the US · updated ${DATA.generated_at}`;
+const win = DATA.stats.window_hours ? `in the last ${DATA.stats.window_hours} hours` : "today";
+$("gen").textContent = `Posted ${win} in the US · ≤${DATA.max_years ?? 7} yrs experience · updated ${DATA.generated_at}`;
 const s = DATA.stats;
 $("stats").innerHTML = [
   [DATA.jobs.length, "relevant jobs"], [s.companies, "companies"], [s.raw.toLocaleString(), "postings scanned"],
   [DATA.jobs.filter(j => j.score >= DATA.strong_score).length, `strong matches (${DATA.strong_score}+)`],
   [s.sponsors ?? 0, "mention sponsorship"],
-  [Object.values(s.blocked || {}).reduce((a, b) => a + b, 0), "hidden: citizenship / clearance / no sponsorship"],
+  [Object.values(s.blocked || {}).reduce((a, b) => a + b, 0), "hidden: work authorization / experience"],
 ].map(([v, l]) => `<div class="stat"><b>${v}</b><span>${l}</span></div>`).join("");
 
 $("resume").innerHTML = `<option value="">Best resume</option>` +
@@ -138,6 +139,8 @@ function render() {
           <span class="chip resume">${esc(r || j.best_resume)} resume</span>
           <span class="chip">${other}</span>
           ${j.tags.includes("sponsors") ? `<span class="chip sponsor">Sponsors visa</span>` : ""}
+          ${j.years_required != null ? `<span class="chip">${j.years_required}+ yrs</span>` : ""}
+          ${/\b(java|spring|jvm|kotlin)\b/i.test(j.title + " " + j.description) ? `<span class="chip">Java</span>` : ""}
           ${j.remote ? `<span class="chip">Remote</span>` : ""}
           <span class="chip">${esc(j.source)}</span>
           ${j.matched_skills.slice(0, 6).map(k => `<span class="chip">${esc(k)}</span>`).join("")}
